@@ -16,28 +16,12 @@ interface ServerModelProps {
 type ViewPreset = 'front' | 'rear' | 'top' | 'thermal';
 
 // ---------------------------------------------------------------------------
-// Defaults
+// Defaults (empty – component shows "no data" state when no real data provided)
 // ---------------------------------------------------------------------------
 
-const DEFAULT_TEMPERATURES: Record<string, number> = {
-  CPU0: 62,
-  CPU1: 58,
-  GPU: 71,
-  System: 38,
-  NVMe: 44,
-};
-
-const DEFAULT_FAN_SPEEDS: Record<string, number> = {
-  FAN1: 2400,
-  FAN2: 2350,
-  FAN3: 2500,
-  FAN4: 2450,
-};
-
-const DEFAULT_VFC_CARDS: Array<{ slot: number; type: string; status: string }> = [
-  { slot: 0, type: 'VFC HD-SDI', status: 'active' },
-  { slot: 1, type: 'VFC HDMI 2.0', status: 'active' },
-];
+const EMPTY_TEMPERATURES: Record<string, number> = {};
+const EMPTY_FAN_SPEEDS: Record<string, number> = {};
+const EMPTY_VFC_CARDS: Array<{ slot: number; type: string; status: string }> = [];
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -587,23 +571,23 @@ function Scene({
       <ChassisBox />
 
       {/* CPUs */}
-      <CPUComponent position={[-0.9, 0.25, 1.8]} temp={temperatures.CPU0 ?? 62} label="CPU0" />
-      <CPUComponent position={[0.9, 0.25, 1.8]} temp={temperatures.CPU1 ?? 58} label="CPU1" />
+      <CPUComponent position={[-0.9, 0.25, 1.8]} temp={temperatures.CPU0 ?? 0} label="CPU0" />
+      <CPUComponent position={[0.9, 0.25, 1.8]} temp={temperatures.CPU1 ?? 0} label="CPU1" />
 
       {/* GPU */}
-      <GPUComponent temp={temperatures.GPU ?? 71} />
+      <GPUComponent temp={temperatures.GPU ?? 0} />
 
       {/* NVMe */}
-      <NVMeComponent temp={temperatures.NVMe ?? 44} />
+      <NVMeComponent temp={temperatures.NVMe ?? 0} />
 
       {/* System sensor */}
-      <SystemSensor temp={temperatures.System ?? 38} />
+      <SystemSensor temp={temperatures.System ?? 0} />
 
       {/* Fans – positioned in a row across the mid-section */}
-      <FanComponent position={[-1.5, 0.3, 0.5]} rpm={fanSpeeds.FAN1 ?? 2400} label="FAN1" />
-      <FanComponent position={[-0.5, 0.3, 0.5]} rpm={fanSpeeds.FAN2 ?? 2350} label="FAN2" />
-      <FanComponent position={[0.5, 0.3, 0.5]} rpm={fanSpeeds.FAN3 ?? 2500} label="FAN3" />
-      <FanComponent position={[1.5, 0.3, 0.5]} rpm={fanSpeeds.FAN4 ?? 2450} label="FAN4" />
+      <FanComponent position={[-1.5, 0.3, 0.5]} rpm={fanSpeeds.FAN1 ?? 0} label="FAN1" />
+      <FanComponent position={[-0.5, 0.3, 0.5]} rpm={fanSpeeds.FAN2 ?? 0} label="FAN2" />
+      <FanComponent position={[0.5, 0.3, 0.5]} rpm={fanSpeeds.FAN3 ?? 0} label="FAN3" />
+      <FanComponent position={[1.5, 0.3, 0.5]} rpm={fanSpeeds.FAN4 ?? 0} label="FAN4" />
 
       {/* VFC slots – rear-right */}
       {[0, 1, 2, 3].map((i) => (
@@ -631,9 +615,9 @@ export default function ServerModel({
   fanSpeeds: fansProp,
   vfcCards: vfcProp,
 }: ServerModelProps) {
-  const temperatures = { ...DEFAULT_TEMPERATURES, ...tempsProp };
-  const fanSpeeds = { ...DEFAULT_FAN_SPEEDS, ...fansProp };
-  const vfcCards = vfcProp ?? DEFAULT_VFC_CARDS;
+  const temperatures = { ...EMPTY_TEMPERATURES, ...tempsProp };
+  const fanSpeeds = { ...EMPTY_FAN_SPEEDS, ...fansProp };
+  const vfcCards = vfcProp ?? EMPTY_VFC_CARDS;
 
   const [viewPreset, setViewPreset] = useState<ViewPreset>('top');
 
