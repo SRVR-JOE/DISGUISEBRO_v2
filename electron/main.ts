@@ -22,13 +22,13 @@ function createWindow() {
     minHeight: 800,
     title: 'd3Watch',
     backgroundColor: '#0A0E17',
-    titleBarStyle: 'hiddenInset',
+    ...(process.platform === 'darwin' ? { titleBarStyle: 'hiddenInset' as const } : {}),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
-    icon: path.join(__dirname, '../public/icon.png'),
+    icon: path.join(__dirname, '../dist/icon.png'),
   });
 
   if (VITE_DEV_SERVER_URL) {
