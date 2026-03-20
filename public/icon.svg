@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="64" fill="#0A0E17"/>
+  <rect x="16" y="16" width="480" height="480" rx="48" fill="none" stroke="#00F0FF" stroke-width="4" opacity="0.5"/>
+  <!-- Lightning bolt -->
+  <path d="M280 80 L200 260 L260 260 L220 432 L340 220 L270 220 L320 80 Z" fill="#00F0FF" opacity="0.9"/>
+  <!-- Glow effect -->
+  <path d="M280 80 L200 260 L260 260 L220 432 L340 220 L270 220 L320 80 Z" fill="none" stroke="#00F0FF" stroke-width="8" opacity="0.3"/>
+  <!-- "d3" text -->
+  <text x="100" y="440" font-family="monospace" font-size="120" font-weight="bold" fill="#F1F5F9" opacity="0.8">d3</text>
+</svg>
