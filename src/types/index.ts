@@ -191,6 +191,8 @@ export interface NetworkProfile {
   createdBy: string;
   createdAt: string;
   showName: string;
+  tags?: string[];
+  description?: string;
   machine: {
     hostname: string;
     role: string;
@@ -250,6 +252,8 @@ export interface D3WatchAPI {
     getAll: () => Promise<NetworkProfile[]>;
     save: (profile: NetworkProfile) => Promise<void>;
     delete: (id: string) => Promise<void>;
+    getLogs: (profileId?: string) => Promise<DeploymentLog[]>;
+    saveLog: (log: DeploymentLog) => Promise<void>;
   };
   api: {
     detectSystems: (ip: string) => Promise<DetectedSystem[]>;
@@ -318,6 +322,98 @@ export interface VFCEvent {
   eventType: string;
   cardType: string;
   firmware: string;
+}
+
+// === Profile Validation Types ===
+export interface ValidationResult {
+  valid: boolean;
+  errors: ValidationError[];
+  warnings: ValidationWarning[];
+}
+
+export interface ValidationError {
+  field: string;
+  adapter?: number;
+  message: string;
+  code: 'MISSING_IP' | 'INVALID_IP' | 'INVALID_NETMASK' | 'MISSING_NAME' | 'MISSING_MAC' | 'DUPLICATE_IP' | 'SUBNET_CONFLICT' | 'MISSING_HOSTNAME' | 'MISSING_PROFILE_NAME';
+}
+
+export interface ValidationWarning {
+  field: string;
+  adapter?: number;
+  message: string;
+  code: 'DHCP_OVERRIDE' | 'SAME_SUBNET' | 'NO_GATEWAY';
+}
+
+// === Deployment Log Types ===
+export interface DeploymentLog {
+  id: string;
+  profileId: string;
+  profileName: string;
+  targetMachineId: string;
+  targetHostname: string;
+  operator: string;
+  timestamp: string;
+  status: 'success' | 'partial' | 'failed';
+  hostnameResult?: DeployStepResult;
+  adapterResults: DeployAdapterResult[];
+  durationMs: number;
+  errorMessage?: string;
+}
+
+export interface DeployStepResult {
+  success: boolean;
+  previousValue?: string;
+  newValue: string;
+  error?: string;
+}
+
+export interface DeployAdapterResult {
+  adapterName: string;
+  mac: string;
+  success: boolean;
+  previousIp?: string;
+  newIp: string;
+  previousNetmask?: string;
+  newNetmask: string;
+  error?: string;
+}
+
+// === Drift Detection Types ===
+export interface DriftResult {
+  profileId: string;
+  machineId: string;
+  timestamp: string;
+  hostnameDrift: boolean;
+  currentHostname: string;
+  expectedHostname: string;
+  adapterDrifts: AdapterDrift[];
+  hasDrift: boolean;
+}
+
+export interface AdapterDrift {
+  adapterName: string;
+  position?: number;
+  mac?: string;
+  currentIp: string;
+  expectedIp: string;
+  currentNetmask: string;
+  expectedNetmask: string;
+  currentName: string;
+  expectedName: string;
+  ipDrift: boolean;
+  netmaskDrift: boolean;
+  nameDrift: boolean;
+}
+
+// === Profile Template Types ===
+export interface ProfileTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: 'solotech-standard' | 'touring' | 'broadcast' | 'custom';
+  icon: string;
+  profile: Omit<NetworkProfile, 'id' | 'createdAt'>;
 }
 
 declare global {
