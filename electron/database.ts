@@ -151,6 +151,20 @@ export class DatabaseService {
         data JSON
       );
 
+      CREATE TABLE IF NOT EXISTS deployment_logs (
+        id TEXT PRIMARY KEY,
+        profile_id TEXT,
+        profile_name TEXT,
+        target_machine_id TEXT,
+        target_hostname TEXT,
+        operator TEXT,
+        timestamp TEXT,
+        status TEXT,
+        duration_ms INTEGER,
+        results JSON,
+        error_message TEXT
+      );
+
       CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value TEXT
@@ -170,6 +184,7 @@ export class DatabaseService {
       CREATE INDEX IF NOT EXISTS idx_issue_comments_issue ON issue_comments(issue_id);
       CREATE INDEX IF NOT EXISTS idx_issue_attachments_issue ON issue_attachments(issue_id);
       CREATE INDEX IF NOT EXISTS idx_machines_online ON machines(is_online);
+      CREATE INDEX IF NOT EXISTS idx_deploy_logs_profile ON deployment_logs(profile_id, timestamp);
     `);
   }
 
@@ -547,6 +562,53 @@ export class DatabaseService {
   deleteProfile(id: string): void {
     const stmt = this.db.prepare('DELETE FROM network_profiles WHERE id = ?');
     stmt.run(id);
+  }
+
+  // ── Deployment Logs ────────────────────────────────────────────────
+
+  getDeploymentLogs(profileId?: string): Record<string, unknown>[] {
+    if (profileId) {
+      const stmt = this.db.prepare('SELECT * FROM deployment_logs WHERE profile_id = ? ORDER BY timestamp DESC');
+      const rows = stmt.all(profileId) as Record<string, unknown>[];
+      return rows.map((row) => {
+        if (row.results && typeof row.results === 'string') {
+          try { row.results = JSON.parse(row.results as string); } catch { /* keep */ }
+        }
+        return row;
+      });
+    }
+    const stmt = this.db.prepare('SELECT * FROM deployment_logs ORDER BY timestamp DESC LIMIT 100');
+    const rows = stmt.all() as Record<string, unknown>[];
+    return rows.map((row) => {
+      if (row.results && typeof row.results === 'string') {
+        try { row.results = JSON.parse(row.results as string); } catch { /* keep */ }
+      }
+      return row;
+    });
+  }
+
+  saveDeploymentLog(log: Record<string, unknown>): void {
+    const id = (log.id as string) ?? crypto.randomUUID();
+    const stmt = this.db.prepare(`
+      INSERT INTO deployment_logs (id, profile_id, profile_name, target_machine_id, target_hostname, operator, timestamp, status, duration_ms, results, error_message)
+      VALUES (@id, @profileId, @profileName, @targetMachineId, @targetHostname, @operator, @timestamp, @status, @durationMs, @results, @errorMessage)
+    `);
+    stmt.run({
+      id,
+      profileId: log.profileId ?? log.profile_id ?? '',
+      profileName: log.profileName ?? log.profile_name ?? '',
+      targetMachineId: log.targetMachineId ?? log.target_machine_id ?? '',
+      targetHostname: log.targetHostname ?? log.target_hostname ?? '',
+      operator: log.operator ?? 'operator',
+      timestamp: log.timestamp ?? new Date().toISOString(),
+      status: log.status ?? 'unknown',
+      durationMs: log.durationMs ?? log.duration_ms ?? 0,
+      results: JSON.stringify({
+        hostnameResult: log.hostnameResult,
+        adapterResults: log.adapterResults,
+      }),
+      errorMessage: log.errorMessage ?? log.error_message ?? null,
+    });
   }
 
   // ── Settings ──────────────────────────────────────────────────────

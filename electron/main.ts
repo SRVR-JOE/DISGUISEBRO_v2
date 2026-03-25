@@ -84,6 +84,12 @@ function setupIPC() {
     db.saveProfile(profile)
   );
   ipcMain.handle('db:deleteProfile', (_e, id: string) => db.deleteProfile(id));
+  ipcMain.handle('db:getDeploymentLogs', (_e, profileId?: string) =>
+    db.getDeploymentLogs(profileId)
+  );
+  ipcMain.handle('db:saveDeploymentLog', (_e, log: Record<string, unknown>) =>
+    db.saveDeploymentLog(log)
+  );
 
   // API calls
   ipcMain.handle('api:detectSystems', (_e, serverIp: string) =>
