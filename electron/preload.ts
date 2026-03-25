@@ -36,6 +36,8 @@ const api = {
     save: (profile: Record<string, unknown>) =>
       ipcRenderer.invoke('db:saveProfile', profile),
     delete: (id: string) => ipcRenderer.invoke('db:deleteProfile', id),
+    getLogs: (profileId?: string) => ipcRenderer.invoke('db:getDeploymentLogs', profileId),
+    saveLog: (log: Record<string, unknown>) => ipcRenderer.invoke('db:saveDeploymentLog', log),
   },
 
   // Designer API
